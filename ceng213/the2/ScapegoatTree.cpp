@@ -1,2 +1,2 @@
 #include "ScapegoatTree.h"
-// the purpose of this file is the testing
+// the purpose of this file is testing
