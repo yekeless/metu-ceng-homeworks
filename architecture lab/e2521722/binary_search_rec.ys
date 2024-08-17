@@ -1,0 +1,113 @@
+# YUNUS EMRE KELEŞ 2521722
+.pos 0x0
+init:
+    irmovq stack, %rsp
+    irmovq $6, %rdx
+    irmovq array_begin, %rdi
+    irmovq array_end, %rsi
+    call binary_search
+    halt
+
+#implement your code below (DO NOT CHANGE/REMOVE THIS COMMENT)
+
+binary_search:
+    	irmovq $-1, %rax    # pass -1 to rax
+	rrmovq %rdi,%rbp	# pass begin to rbp
+	rrmovq %rsi,%rcx	# pass end to rcx
+	subq %rbp,%rcx		# subtract begin from the end
+	jle end_of_the_recursion	# if conditon is false jump end_of_the_recursion
+	rrmovq %rsi,%r11	# pass end to r11
+	subq %rdi,%r11		# subtract begin from end and save it to the r11
+	irmovq $8,%r12		# pass 8 to the r12
+	dvvq %r12,%r11		# divide the array size by 8
+	irmovq $2,%r13		# pass 2 to the r13
+	modq %r13,%r11		# take mod 2 of r11
+	je even_case		# jump even case
+	jmp odd_case		# jump odd case
+even_case:
+	rrmovq %rdi,%rbp	# pass begin to rbp
+	rrmovq %rsi,%rcx	# pass end to rcx
+	subq %rbp,%rcx		# subtract begin from end and save it in the rcx
+	dvvq %r13,%rcx		# divide array size by 2
+	addq %rdi,%rcx		# add begin to index
+	jmp compare
+odd_case:
+	rrmovq %rdi,%rbp	# pass begin to rbp
+	rrmovq %rsi,%rcx	# pass end to rcx
+	subq %rbp,%rcx		# subtract begin from end and save it in the rcx
+	dvvq %r13,%rcx		# divide array size by 2
+	irmovq $4,%rbx		# pass 4 to the rbx
+	subq %rbx,%rcx		# subtract 4 from rcx
+	addq %rdi,%rcx		# add begin to index
+	jmp compare		# jump compare block
+compare:
+	mrmovq (%rcx),%rbx	# move the element which is in the rcx adress to the rbx 
+	subq %rdx,%rbx		# subtract the key value from rbx
+	je found		# if it is 0 jump found
+	jg small		# if it is greater than 0 then jump small part
+	jl big			# if it is less than 0 then jump big part
+found:
+	subq %rdi,%rcx 		# subtract the beginning adress from the found element adress
+	irmovq $8,%r9		# pass 8 to the r9
+	dvvq %r9,%rcx		# divide the value by 8 in order to find index
+	irmovq $1,%r9		# pass 1 to the r9
+	addq %r9,%rcx		# add 1 to the value
+	rrmovq %rcx,%rax	# move value to the rax
+	ret	
+small:
+	pushq %rdi 		# push rdi to the stack
+	pushq %rsi		# push rsi to the stack
+	rrmovq %rcx,%rsi	# make the middle new end
+	call binary_search	# make the recursive call
+	popq %rsi		# pop rsi
+	popq %rdi		# pop rdi
+	ret
+	
+big:
+	pushq %rdi		# push rdi to the stack
+	pushq %rsi 		# push rsi to the stack
+	pushq %rcx		# push rcx to the stack
+	irmovq $8,%r9		# pass 8 to r9
+	rrmovq %rcx,%rdi	# move rcx to rdi
+	addq %r9,%rdi		# add 8 to the find new array beginning
+	call binary_search	# make the recursive call
+	popq %rcx		# pop rcx
+	popq %rsi		# pop rsi
+	popq %rdi		# pop rdi
+	rrmovq %rax,%r10	# mov returning value to the r10
+	irmovq $1,%r12		# mov 1 to the r12
+	addq %rax,%r12		# add 1 to the result if it is zero jump the eof recursion
+	je end_of_the_recursion	# jump to the eof recursion
+	rrmovq %rdi,%rbx	# mov begin to the rbx
+	rrmovq %rcx,%rbp	# mov middle to the rbp
+	irmovq $8,%r9		# mov 8 to the r9
+	subq %rbx,%rbp		# subtract rbx from rbp
+	dvvq %r9,%rbp		# divide it by 8 to find index
+	irmovq $1,%r9		# pass 1 to the r9
+	addq %r9,%rbp		# add 1 to the rbp
+	addq %rbp,%rax		# add (mid-begin)+1 to the temp and return it
+	ret
+					
+end_of_the_recursion:
+	irmovq $-1,%rax		# mov -1 to the rax
+	ret						
+
+#implement your code above (DO NOT CHANGE/REMOVE THIS COMMENT)
+
+.pos 0x1008
+array_begin:
+    .quad 1
+    .quad 2
+    .quad 3
+    .quad 5
+    .quad 6
+    .quad 7
+    .quad 9
+    .quad 11
+array_end:
+    .quad 0
+.pos 0x1F00
+stack:
+    .quad 0
+
+
